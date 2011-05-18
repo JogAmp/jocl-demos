@@ -147,17 +147,18 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
     //        gl.glBufferData(GL2.GL_ELEMENT_ARRAY_BUFFER, ib.capacity() * SIZEOF_INT, ib, GL2.GL_STATIC_DRAW);
     //        gl.glBindBuffer(GL2.GL_ELEMENT_ARRAY_BUFFER, 0);
 
+            final int bsz = MESH_SIZE * MESH_SIZE * 4 * SIZEOF_FLOAT;
             gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
                 gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, glObjects[VERTICES]);
-                gl.glBufferData(GL2.GL_ARRAY_BUFFER, MESH_SIZE * MESH_SIZE * 4 * SIZEOF_FLOAT, null, GL2.GL_DYNAMIC_DRAW);
+                gl.glBufferData(GL2.GL_ARRAY_BUFFER, bsz, null, GL2.GL_DYNAMIC_DRAW);
                 gl.glBindBuffer(GL2.GL_ARRAY_BUFFER, 0);
-            gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);
+            gl.glDisableClientState(GL2.GL_VERTEX_ARRAY);                       
 
             pushPerspectiveView(gl);
             gl.glFinish();
 
             // init OpenCL
-            initCL();
+            initCL(gl, bsz);
 
             // start rendering thread
             Animator animator = new Animator(drawable);
@@ -166,7 +167,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
         }
     }
 
-    private void initCL() {
+    private void initCL(GL2 gl, int bufferSize) {
 
         CLProgram program;
         try {
@@ -181,7 +182,9 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
 
         commandQueue = clContext.getMaxFlopsDevice().createCommandQueue();
 
-        clBuffer = clContext.createFromGLBuffer(glObjects[VERTICES], CLGLBuffer.Mem.WRITE_ONLY);
+        clBuffer = clContext.createFromGLBuffer(glObjects[VERTICES], 
+                                                bufferSize /* gl.glGetBufferSize(glObjects[VERTICES]*/, 
+                                                CLGLBuffer.Mem.WRITE_ONLY);
 
         System.out.println("cl buffer type: " + clBuffer.getGLObjectType());
         System.out.println("shared with gl buffer: " + clBuffer.getGLObjectID());
@@ -230,9 +233,9 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
 
         kernel.setArg(2, step += 0.05f);
 
-        commandQueue.putAcquireGLObject(clBuffer.ID)
+        commandQueue.putAcquireGLObject(clBuffer)
                     .put2DRangeKernel(kernel, 0, 0, MESH_SIZE, MESH_SIZE, 0, 0)
-                    .putReleaseGLObject(clBuffer.ID)
+                    .putReleaseGLObject(clBuffer)
                     .finish();
 
     }

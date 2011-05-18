@@ -280,12 +280,12 @@ public class MultiDeviceFractal implements GLEventListener {
         // setup one empty PBO per slice
         for (int i = 0; i < slices; i++) {
 
+            final int size = width*height * SIZEOF_INT / slices ;
             gl.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo[i]);
-            gl.glBufferData(GL_PIXEL_UNPACK_BUFFER, width*height * SIZEOF_INT / slices, null, GL_STREAM_DRAW);
+            gl.glBufferData(GL_PIXEL_UNPACK_BUFFER, size, null, GL_STREAM_DRAW);
             gl.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-            pboBuffers[i] = clContext.createFromGLBuffer(pbo[i], WRITE_ONLY);
-
+            pboBuffers[i] = clContext.createFromGLBuffer(pbo[i], size, WRITE_ONLY);
         }
 
         buffersInitialized = true;
@@ -386,9 +386,9 @@ public class MultiDeviceFractal implements GLEventListener {
                       .rewind();
 
             // aquire GL objects, and enqueue a kernel with a probe from the list
-            queues[i].putAcquireGLObject(pboBuffers[i].ID)
+            queues[i].putAcquireGLObject(pboBuffers[i])
                      .put2DRangeKernel(kernels[i], 0, 0, sliceWidth, height, 0, 0, probes)
-                     .putReleaseGLObject(pboBuffers[i].ID);
+                     .putReleaseGLObject(pboBuffers[i]);
 
         }
 
