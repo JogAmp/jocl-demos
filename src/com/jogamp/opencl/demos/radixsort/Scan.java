@@ -117,6 +117,7 @@ public class Scan implements CLResource {
         return ((x - 1) & x) == 0;
     }
 
+    @Override
     public void release() {
         program.release();
 
@@ -125,12 +126,8 @@ public class Scan implements CLResource {
         }
     }
 
+    @Override
     public boolean isReleased() {
-        throw new UnsupportedOperationException();
-        // FIXME: return program.isReleased();
-    }
-
-    public void close() {
-        release();
+        return program.isReleased();
     }
 }

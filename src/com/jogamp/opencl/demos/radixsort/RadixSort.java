@@ -159,6 +159,7 @@ public class RadixSort implements CLResource {
         queue.put1DRangeKernel(ckReorderDataKeysOnly, 0, globalWorkSize, localWorkSize);
     }
 
+    @Override
     public void release() {
 
         scan.release();
@@ -173,14 +174,8 @@ public class RadixSort implements CLResource {
         mBlockOffsets.release();
     }
 
+    @Override
     public boolean isReleased() {
         return scan.isReleased();
     }
-
-    public void close() {
-        release();
-    }
-
-
-
 }
