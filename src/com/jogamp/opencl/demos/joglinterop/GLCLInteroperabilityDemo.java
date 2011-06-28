@@ -81,7 +81,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
 //        ib.rewind();
 
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+            @Override public void run() {
                 initUI();
             }
         });
@@ -111,6 +111,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
     }
 
 
+    @Override
     public void init(GLAutoDrawable drawable) {
 
         if(clContext == null) {
@@ -198,6 +199,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
     }
 
 
+    @Override
     public void display(GLAutoDrawable drawable) {
 
         GL2 gl = drawable.getGL().getGL2();
@@ -266,6 +268,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
     }
 
 
+    @Override
     public void reshape(GLAutoDrawable drawable, int arg1, int arg2, int width, int height) {
         this.width = width;
         this.height = height;
@@ -274,6 +277,7 @@ public class GLCLInteroperabilityDemo implements GLEventListener {
         pushPerspectiveView(gl);
     }
 
+    @Override
     public void dispose(GLAutoDrawable drawable) {  }
 
     public static void main(String[] args) {

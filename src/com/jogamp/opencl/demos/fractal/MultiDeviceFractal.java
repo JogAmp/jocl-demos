@@ -123,6 +123,7 @@ public class MultiDeviceFractal implements GLEventListener {
         textRenderer = new TextRenderer(frame.getFont().deriveFont(Font.BOLD, 14), true, true, null, false);
     }
 
+    @Override
     public void init(GLAutoDrawable drawable) {
 
         if(clContext == null) {
@@ -349,6 +350,7 @@ public class MultiDeviceFractal implements GLEventListener {
     }
 
     // rendering cycle
+    @Override
     public void display(GLAutoDrawable drawable) {
         GL gl = drawable.getGL();
 
@@ -438,6 +440,7 @@ public class MultiDeviceFractal implements GLEventListener {
         textRenderer.endRendering();
     }
 
+    @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
 
         if(this.width == width && this.height == height)
@@ -540,6 +543,7 @@ public class MultiDeviceFractal implements GLEventListener {
         win.dispose();
     }
 
+    @Override
     public void dispose(GLAutoDrawable drawable) {
     }
 
@@ -549,7 +553,7 @@ public class MultiDeviceFractal implements GLEventListener {
         GLProfile.initSingleton(false);
         
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+            @Override public void run() {
                 new MultiDeviceFractal(512, 512);
             }
         });

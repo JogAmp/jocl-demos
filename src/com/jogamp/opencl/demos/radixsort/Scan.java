@@ -125,6 +125,11 @@ public class Scan implements CLResource {
         }
     }
 
+    public boolean isReleased() {
+        throw new UnsupportedOperationException();
+        // FIXME: return program.isReleased();
+    }
+
     public void close() {
         release();
     }
