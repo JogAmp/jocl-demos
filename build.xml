@@ -18,6 +18,13 @@
     <import file="${gluegen.root}/make/jogamp-env.xml" />
     <import file="${gluegen.root}/make/jogamp-archivetasks.xml" />
 
+    <target name="-pre-init" depends="jogamp.env.init">
+        <property name="javac.debug" value="${javacdebug}"/>
+        <property name="javac.source" value="${target.sourcelevel}"/>
+        <property name="javac.target" value="${target.targetlevel}"/>
+        <property name="javac.compilerargs" value="-bootclasspath ${target.rt.jar} -Xlint -g:${javacdebuglevel}"/>
+    </target>
+
     <target name="-pre-jar" depends="jogamp.env.init">
         <tstamp>
             <format property="version.timestamp" pattern="yyyyMMdd"/>
