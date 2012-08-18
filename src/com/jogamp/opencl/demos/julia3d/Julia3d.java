@@ -197,8 +197,7 @@ public class Julia3d {
 
     public static void main(String[] args) {
         
-        //false for webstart compatibility
-        GLProfile.initSingleton(false);
+        GLProfile.initSingleton();
         
         final RenderingConfig config = RenderingConfig.create()
             .setWidth(640).setHeight(480)

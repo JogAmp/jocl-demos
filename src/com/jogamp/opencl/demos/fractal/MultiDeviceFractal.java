@@ -549,8 +549,7 @@ public class MultiDeviceFractal implements GLEventListener {
 
     public static void main(String args[]) {
         
-        //false for webstart compatibility
-        GLProfile.initSingleton(false);
+        GLProfile.initSingleton();
         
         SwingUtilities.invokeLater(new Runnable() {
             @Override public void run() {
