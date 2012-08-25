@@ -41,28 +41,26 @@
     <target name="-post-jar" depends="tag.build,create-all-jnlps,gluegen.cpptasks.detect.os,build-archive"/>
 
     <target name="build-archive" if="build.archiveon">
-        <property name="dist.zip.name" value="jocl-demos-${jocl-demos.version}-${os.and.arch}"/>
+        <property name="archive.zip.name" value="jocl-demos-${jocl-demos.version}-${os.and.arch}"/>
         
-        <mkdir dir="${dist.dir}/tmp/${dist.zip.name}"/>
+        <mkdir dir="${build.dir}/${archive.zip.name}"/>
         
-        <copy todir="${dist.dir}/tmp/${dist.zip.name}/jar" file="${dist.dir}/jocl-demos.jar"/>
-        <copy todir="${dist.dir}/tmp/${dist.zip.name}/jnlp-files" >
-            <fileset dir="${dist.dir}" includes="*.jnlp"/>
-        </copy>
-        <copy todir="${dist.dir}/tmp/${dist.zip.name}" >
+        <copy todir="${build.dir}/${archive.zip.name}" >
             <fileset dir="." includes="www/**"/>
-            <fileset dir="${dist.dir}" includes="*.properties"/>
+            <fileset dir="${build.dir}" includes="jar/**"/>
+            <fileset dir="${build.dir}" includes="jnlp-files/**"/>
+            <fileset dir="${build.dir}" includes="*.properties"/>
         </copy>
         
-        <zip        basedir="${dist.dir}/tmp" destfile="${dist.dir}/${dist.zip.name}.zip"/>
-        <archive.7z basedir="${dist.dir}/tmp" destfile="${dist.dir}/${dist.zip.name}.7z"  includes="*"/>
+        <archive.7z basedir="${build.dir}" destfile="${build.dir}/${archive.zip.name}.7z"  includes="${archive.zip.name}/**"/>
 
-        <delete dir="${dist.dir}/tmp"/>
+        <delete dir="${build.dir}/${archive.zip.name}"/>
         
     </target>
 
     <target name="create-all-jnlps">
 
+        <!-- preset properties for local testing -->
         <property name="jocl.codepase"       value="JOCL_CODEBASE_TAG"/>
         <property name="jogl.codepase"       value="JOGL_CODEBASE_TAG"/>
         <property name="jocl-demos.codepase" value="DEMO_CODEBASE_TAG"/>
@@ -105,21 +103,20 @@
     </target>
 
     <target name="tag.build">
-        <property file="${dist.jar.dir}/artifact.properties"/>
-        <copy file="${jocl.root}/dist/artifact.properties" todir="${dist.jar.dir}" overwrite="true"/>
-        <echo file="${dist.jar.dir}/artifact.properties" message="jocl-demos.build.number=${jocl-demos.build.number}${line.separator}" append="true" />
-        <echo file="${dist.jar.dir}/artifact.properties" message="jocl-demos.build.id=${jocl-demos.build.id}${line.separator}" append="true" />
-        <echo file="${dist.jar.dir}/artifact.properties" message="jocl-demos.build.branch=${jocl-demos.build.branch}${line.separator}" append="true" />
-        <echo file="${dist.jar.dir}/artifact.properties" message="jocl-demos.build.commit=${jocl-demos.build.commit}${line.separator}" append="true" />
+        <copy file="${jocl.root}/dist/artifact.properties" todir="${build.dir}" overwrite="true"/>
+        <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.number=${jocl-demos.build.number}${line.separator}" append="true" />
+        <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.id=${jocl-demos.build.id}${line.separator}" append="true" />
+        <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.branch=${jocl-demos.build.branch}${line.separator}" append="true" />
+        <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.commit=${jocl-demos.build.commit}${line.separator}" append="true" />
     </target>
 
     <target name="create-jnlp">
         <condition  property="jogl.extension"
-                    value='&lt;extension name="newt-all-awt" href="${jogl.codepase}/newt-all-awt.jnlp"/&gt;'
+                    value='&lt;extension name="jogl-all-awt" href="${jogl.codepase}/jogl-all-awt.jnlp"/&gt;'
                     else="">
             <istrue value="${jnlp.jogl}"/>
         </condition>
-        <copy file="demo-template.jnlp" tofile="${dist.jar.dir}/${jnlp.name}.jnlp">
+        <copy file="demo-template.jnlp" tofile="${build.dir}/jnlp-files/${jnlp.name}.jnlp">
             <filterchain>
                 <replacestring from="DEMO_TITLE" to="${jnlp.title}"/>
                 <replacestring from="NAME_TAG" to="${jnlp.name}"/>
