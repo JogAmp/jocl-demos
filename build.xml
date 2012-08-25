@@ -103,7 +103,7 @@
     </target>
 
     <target name="tag.build">
-        <copy file="${jocl.root}/dist/artifact.properties" todir="${build.dir}" overwrite="true"/>
+        <copy file="${jocl.root}/${rootrel.build}/artifact.properties" todir="${build.dir}" overwrite="true"/>
         <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.number=${jocl-demos.build.number}${line.separator}" append="true" />
         <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.id=${jocl-demos.build.id}${line.separator}" append="true" />
         <echo file="${build.dir}/artifact.properties" message="jocl-demos.build.branch=${jocl-demos.build.branch}${line.separator}" append="true" />
