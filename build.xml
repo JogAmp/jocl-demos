@@ -26,16 +26,12 @@
     </target>
 
     <target name="-pre-jar" depends="jogamp.env.init">
-        <tstamp>
-            <format property="version.timestamp" pattern="yyyyMMdd"/>
-        </tstamp>
-
         <property name="jocl-demos.build.number" value="manual" />
         <property name="jocl-demos.build.id"     value="${version.timestamp}" />
         <property name="jocl-demos.build.branch" value="master" />
         <property name="jocl-demos.build.commit" value="manual" />
 
-        <property name="jocl-demos.version" value="${jocl_demos_base_version}-b${jocl-demos.build.number}-${version.timestamp}" />
+        <property name="jocl-demos.version" value="${jogamp.version.base}-b${jocl-demos.build.number}-${version.timestamp}" />
     </target>
 
     <target name="-post-jar" depends="tag.build,create-all-jnlps,gluegen.cpptasks.detect.os,build-archive"/>
