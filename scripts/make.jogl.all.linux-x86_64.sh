@@ -1,5 +1,9 @@
 #! /bin/sh
 
+# $0 -Dmain.class=com.jogamp.opencl.demos.bitonicsort.BitonicSort run
+# $0 -Dmain.class=com.jogamp.opencl.demos.julia3d.Julia3d run
+# $0 -Dmain.class=com.jogamp.opencl.demos.joglinterop.GLCLInteroperabilityDemo run
+
 if [ -e ../setenv-build-jogl-x86_64.sh ] ; then
     . ../setenv-build-jogl-x86_64.sh
 fi

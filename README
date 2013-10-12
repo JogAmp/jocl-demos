@@ -33,3 +33,10 @@
      \__\/        \  \::/       \  \:\        \  \::/        /__/:/   
                    \__\/         \__\/         \__\/         \__\/    
 
+build:
+    ant
+
+run single demo:
+    ant -Dmain.class=com.jogamp.opencl.demos.bitonicsort.BitonicSort run
+    ant -Dmain.class=com.jogamp.opencl.demos.julia3d.Julia3d run
+    ant -Dmain.class=com.jogamp.opencl.demos.joglinterop.GLCLInteroperabilityDemo run
