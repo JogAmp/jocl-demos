@@ -3,10 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/jogamp"/>
-	<classpathentry kind="lib" path="/jocl/dist/jocl.jar" sourcepath="/jocl/src">
-		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="jocl/build/obj"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="lib" path="/jocl/build/jar/jocl.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
