@@ -4,3 +4,6 @@ Implementation-Title: Java Bindings for OpenCL Tests
 Implementation-Vendor: JogAmp Community
 Implementation-URL: http://jocl.jogamp.org/
 Implementation-Vendor-Id: com.jogamp
+Permissions: sandbox
+Application-Library-Allowable-Codebase: *
+
