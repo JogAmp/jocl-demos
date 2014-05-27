@@ -71,7 +71,7 @@ public class MultiDeviceFractal implements GLEventListener {
     // max per pixel iterations to compute the fractal
     private static final int MAX_ITERATIONS         = 500;
 
-    private GLCanvas canvas;
+    private final GLCanvas canvas;
 
     private CLGLContext clContext;
     private CLCommandQueue[] queues;
@@ -113,7 +113,7 @@ public class MultiDeviceFractal implements GLEventListener {
             public void windowClosing(WindowEvent e) {
                 MultiDeviceFractal.this.release(e.getWindow());
             }
-        }); 
+        });
         canvas.setPreferredSize(new Dimension(width, height));
         frame.add(canvas);
         frame.pack();
@@ -139,7 +139,7 @@ public class MultiDeviceFractal implements GLEventListener {
             gl.glDisable(GL_DEPTH_TEST);
             gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-            initView(gl, drawable.getWidth(), drawable.getHeight());
+            initView(gl, drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
 
             initPBO(gl);
             drawable.getGL().glFinish();
@@ -219,7 +219,7 @@ public class MultiDeviceFractal implements GLEventListener {
     }
 
     private void initColorMap(IntBuffer colorMap, int stepSize, Color... colors) {
-        
+
         for (int n = 0; n < colors.length - 1; n++) {
 
             Color color = colors[n];
@@ -453,7 +453,7 @@ public class MultiDeviceFractal implements GLEventListener {
         setKernelConstants();
 
         initView(drawable.getGL().getGL2(), width, height);
-        
+
     }
 
     private void initSceneInteraction() {
@@ -464,7 +464,7 @@ public class MultiDeviceFractal implements GLEventListener {
 
             @Override
             public void mouseDragged(MouseEvent e) {
-                
+
                 double offsetX = (lastpos.x - e.getX()) * (maxX - minX) / width;
                 double offsetY = (lastpos.y - e.getY()) * (maxY - minY) / height;
 
@@ -484,7 +484,7 @@ public class MultiDeviceFractal implements GLEventListener {
             public void mouseMoved(MouseEvent e) {
                 lastpos = e.getPoint();
             }
-            
+
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
                 float rotation = e.getWheelRotation() / 25.0f;
@@ -548,9 +548,9 @@ public class MultiDeviceFractal implements GLEventListener {
     }
 
     public static void main(String args[]) {
-        
+
         GLProfile.initSingleton();
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override public void run() {
                 new MultiDeviceFractal(512, 512);
