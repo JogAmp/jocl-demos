@@ -7,7 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import javax.media.opengl.GL2;
+import com.jogamp.opengl.GL2;
 
 /**
  * Utility class for interacting with a scene. Supports rotation and zoom around origin.

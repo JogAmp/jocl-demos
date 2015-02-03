@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import javax.media.opengl.GLProfile;
+import com.jogamp.opengl.GLProfile;
 import javax.swing.SwingUtilities;
 
 import static com.jogamp.opencl.CLDevice.Type.*;

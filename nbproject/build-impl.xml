@@ -549,6 +549,7 @@ is divided into following sections:
             <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">
                 <include name="**/*.java"/>
             </fileset>
+            <arg value="${javadoc.xarg1}"/>
         </javadoc>
     </target>
     <target depends="init,-javadoc-build" if="netbeans.home" name="-javadoc-browse" unless="no.javadoc.preview">
