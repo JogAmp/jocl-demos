@@ -16,84 +16,84 @@ class RenderingConfig32 extends RenderingConfig {
 
 
   public RenderingConfig setWidth(int val) {
-    accessor.setIntAt(0, val);
+    accessor.setIntAt(4*0, val);
     return this;
   }
 
   public int getWidth() {
-    return accessor.getIntAt(0);
+    return accessor.getIntAt(4*0);
   }
 
   public RenderingConfig setHeight(int val) {
-    accessor.setIntAt(1, val);
+    accessor.setIntAt(4*1, val);
     return this;
   }
 
   public int getHeight() {
-    return accessor.getIntAt(1);
+    return accessor.getIntAt(4*1);
   }
 
   public RenderingConfig setSuperSamplingSize(int val) {
-    accessor.setIntAt(2, val);
+    accessor.setIntAt(4*2, val);
     return this;
   }
 
   public int getSuperSamplingSize() {
-    return accessor.getIntAt(2);
+    return accessor.getIntAt(4*2);
   }
 
   public RenderingConfig setActvateFastRendering(int val) {
-    accessor.setIntAt(3, val);
+    accessor.setIntAt(4*3, val);
     return this;
   }
 
   public int getActvateFastRendering() {
-    return accessor.getIntAt(3);
+    return accessor.getIntAt(4*3);
   }
 
   public RenderingConfig setEnableShadow(int val) {
-    accessor.setIntAt(4, val);
+    accessor.setIntAt(4*4, val);
     return this;
   }
 
   public int getEnableShadow() {
-    return accessor.getIntAt(4);
+    return accessor.getIntAt(4*4);
   }
 
   public RenderingConfig setMaxIterations(int val) {
-    accessor.setIntAt(5, val);
+    accessor.setIntAt(4*5, val);
     return this;
   }
 
   public int getMaxIterations() {
-    return accessor.getIntAt(5);
+    return accessor.getIntAt(4*5);
   }
 
   public RenderingConfig setEpsilon(float val) {
-    accessor.setFloatAt(6, val);
+    accessor.setFloatAt(4*6, val);
     return this;
   }
 
   public float getEpsilon() {
-    return accessor.getFloatAt(6);
+    return accessor.getFloatAt(4*6);
   }
 
   public RenderingConfig setMu(float[] val) {
-    accessor.setFloatsAt(8, val);
+    accessor.setFloatsAt(4*8, val);
     return this;
   }
 
   public float[] getMu() {
-    return accessor.getFloatsAt(8, new float[4]);
+    return accessor.getFloatsAt(4*8, new float[4]);
   }
 
   public RenderingConfig setLight(float[] val) {
-    accessor.setFloatsAt(12, val);
+    accessor.setFloatsAt(4*12, val);
     return this;
   }
 
   public float[] getLight() {
-    return accessor.getFloatsAt(12, new float[3]);
+    return accessor.getFloatsAt(4*12, new float[3]);
   }
 
   public Camera getCamera() {

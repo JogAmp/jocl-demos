@@ -29,6 +29,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.jogamp.opengl.DebugGL2;
@@ -52,15 +53,14 @@ import static java.lang.Math.*;
 
 /**
  * Computes the Mandelbrot set with OpenCL using multiple GPUs and renders the result with OpenGL.
- * A shared PBO is used as storage for the fractal image.<br/>
+ * A shared PBO is used as storage for the fractal image.<p>
  * http://en.wikipedia.org/wiki/Mandelbrot_set
  * <p>
- * controls:<br/>
- * keys 1-9 control parallelism level<br/>
- * space enables/disables slice seperator<br/>
- * 'd' toggles between 32/64bit floatingpoint precision<br/>
- * mouse/mousewheel to drag and zoom<br/>
- * </p>
+ * controls:<p>
+ * keys 1-9 control parallelism level<p>
+ * space enables/disables slice seperator<p>
+ * 'd' toggles between 32/64bit floatingpoint precision<p>
+ * mouse/mousewheel to drag and zoom<p>
  * @author Michael Bien
  */
 public class MultiDeviceFractal implements GLEventListener {
@@ -78,8 +78,8 @@ public class MultiDeviceFractal implements GLEventListener {
     private CLKernel[] kernels;
     private CLProgram[] programs;
     private CLEventList probes;
-    private CLGLBuffer<?>[] pboBuffers;
-    private CLBuffer<IntBuffer>[] colorMap;
+    private ArrayList<CLGLBuffer<?>> pboBuffers;
+    private ArrayList<CLBuffer<IntBuffer>> colorMap;
 
     private int width  = 0;
     private int height = 0;
@@ -148,7 +148,8 @@ public class MultiDeviceFractal implements GLEventListener {
         }
     }
 
-    private void initCL(GLContext glCtx){
+//	@SuppressWarnings( "unchecked" )
+	private void initCL(GLContext glCtx){
         try {
             CLPlatform platform = CLPlatform.getDefault();
             // SLI on NV platform wasn't very fast (or did not work at all -> CL_INVALID_OPERATION)
@@ -165,15 +166,15 @@ public class MultiDeviceFractal implements GLEventListener {
             queues = new CLCommandQueue[slices];
             kernels = new CLKernel[slices];
             probes = new CLEventList(slices);
-            colorMap = new CLBuffer[slices];
+            colorMap = new ArrayList<CLBuffer<IntBuffer>>(slices);
 
             for (int i = 0; i < slices; i++) {
 
-                colorMap[i] = clContext.createIntBuffer(32*2, READ_ONLY);
-                initColorMap(colorMap[i].getBuffer(), 32, Color.BLUE, Color.GREEN, Color.RED);
+                colorMap.add(clContext.createIntBuffer(32*2, READ_ONLY));
+                initColorMap(colorMap.get(i).getBuffer(), 32, Color.BLUE, Color.GREEN, Color.RED);
 
                 // create command queue and upload color map buffer on each used device
-                queues[i] = devices[i].createCommandQueue(PROFILING_MODE).putWriteBuffer(colorMap[i], true); // blocking upload
+                queues[i] = devices[i].createCommandQueue(PROFILING_MODE).putWriteBuffer(colorMap.get(i), true); // blocking upload
 
             }
 
@@ -260,20 +261,19 @@ public class MultiDeviceFractal implements GLEventListener {
         gl.glOrtho(0.0, width, 0.0, height, 0.0, 1.0);
     }
 
-    @SuppressWarnings("unchecked")
     private void initPBO(GL gl) {
 
         if(pboBuffers != null) {
-            int[] oldPbos = new int[pboBuffers.length];
-            for (int i = 0; i < pboBuffers.length; i++) {
-                CLGLBuffer<?> buffer = pboBuffers[i];
+            int[] oldPbos = new int[pboBuffers.size()];
+            for (int i = 0; i < pboBuffers.size(); i++) {
+                CLGLBuffer<?> buffer = pboBuffers.get(i);
                 oldPbos[i] = buffer.GLID;
                 buffer.release();
             }
             gl.glDeleteBuffers(oldPbos.length, oldPbos, 0);
         }
 
-        pboBuffers = new CLGLBuffer[slices];
+        pboBuffers = new ArrayList<CLGLBuffer<?>>(slices);
 
         int[] pbo = new int[slices];
         gl.glGenBuffers(slices, pbo, 0);
@@ -286,7 +286,7 @@ public class MultiDeviceFractal implements GLEventListener {
             gl.glBufferData(GL_PIXEL_UNPACK_BUFFER, size, null, GL_STREAM_DRAW);
             gl.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-            pboBuffers[i] = clContext.createFromGLBuffer(pbo[i], size, WRITE_ONLY);
+            pboBuffers.add(clContext.createFromGLBuffer(pbo[i], size, WRITE_ONLY));
         }
 
         buffersInitialized = true;
@@ -342,9 +342,9 @@ public class MultiDeviceFractal implements GLEventListener {
     private void setKernelConstants() {
         for (int i = 0; i < slices; i++) {
             kernels[i].setForce32BitArgs(!doublePrecision || !isDoubleFPAvailable(queues[i].getDevice()))
-                      .setArg(6, pboBuffers[i])
-                      .setArg(7, colorMap[i])
-                      .setArg(8, colorMap[i].getBuffer().capacity())
+                      .setArg(6, pboBuffers.get(i))
+                      .setArg(7, colorMap.get(i))
+                      .setArg(8, colorMap.get(i).getBuffer().capacity())
                       .setArg(9, MAX_ITERATIONS);
         }
     }
@@ -388,9 +388,9 @@ public class MultiDeviceFractal implements GLEventListener {
                       .rewind();
 
             // aquire GL objects, and enqueue a kernel with a probe from the list
-            queues[i].putAcquireGLObject(pboBuffers[i])
+            queues[i].putAcquireGLObject(pboBuffers.get(i))
                      .put2DRangeKernel(kernels[i], 0, 0, sliceWidth, height, 0, 0, probes)
-                     .putReleaseGLObject(pboBuffers[i]);
+                     .putReleaseGLObject(pboBuffers.get(i));
 
         }
 
@@ -413,7 +413,7 @@ public class MultiDeviceFractal implements GLEventListener {
 
             int seperatorOffset = drawSeperator?i:0;
 
-            gl.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboBuffers[i].GLID);
+            gl.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboBuffers.get(i).GLID);
             gl.glRasterPos2i(sliceWidth*i + seperatorOffset, 0);
 
             gl.glDrawPixels(sliceWidth, height, GL_BGRA, GL_UNSIGNED_BYTE, 0);

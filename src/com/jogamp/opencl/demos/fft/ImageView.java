@@ -9,6 +9,7 @@ import javax.swing.JComponent;
  * Just draws an image.
  * @author notzed
  */
+@SuppressWarnings("serial")
 class ImageView extends JComponent {
 
     BufferedImage img;

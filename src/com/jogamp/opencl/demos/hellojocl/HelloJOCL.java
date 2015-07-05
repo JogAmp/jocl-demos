@@ -16,7 +16,7 @@ import static java.lang.Math.*;
 
 /**
  * Hello Java OpenCL example. Adds all elements of buffer A to buffer B
- * and stores the result in buffer C.<br/>
+ * and stores the result in buffer C.<p>
  * Sample was inspired by the Nvidia VectorAdd example written in C/C++
  * which is bundled in the Nvidia OpenCL SDK.
  * @author Michael Bien

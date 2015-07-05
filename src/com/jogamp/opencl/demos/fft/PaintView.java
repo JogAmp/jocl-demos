@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
  * Draws an image and lets you draw white dots in it with the mouse.  Or big white dots with code.
  * @author notzed
  */
+@SuppressWarnings("serial")
 class PaintView extends ImageView implements MouseListener, MouseMotionListener {
 
 	Graphics2D imgg;
@@ -70,14 +71,14 @@ class PaintView extends ImageView implements MouseListener, MouseMotionListener 
 	}
 
 	public void mousePressed(MouseEvent e) {
-		if (e.getButton() == e.BUTTON1) {
+		if (e.getButton() == MouseEvent.BUTTON1) {
 			addMouseMotionListener(this);
 			drawPaint(e.getX(), e.getY());
 		}
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if (e.getButton() == e.BUTTON1) {
+		if (e.getButton() == MouseEvent.BUTTON1) {
 			removeMouseMotionListener(this);
 			//drawPaint(e.getX(), e.getY());
 		}

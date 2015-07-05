@@ -175,7 +175,8 @@ public class UserSceneController {
             .setZ(orig.getZ()+zoom);
     }
 
-    private void rotateLightX(float k) {
+    @SuppressWarnings("unused")
+	private void rotateLightX(float k) {
         float[] light = model.getLight();
         float y = light[1];
         float z = light[2];
@@ -184,7 +185,8 @@ public class UserSceneController {
         model.setLight(light);
     }
 
-    private void rotateLightY(float k) {
+    @SuppressWarnings("unused")
+	private void rotateLightY(float k) {
         float[] light = model.getLight();
         float x = light[0];
         float z = light[2];

@@ -62,7 +62,7 @@ public class RadixSort implements CLResource {
         program = context.createProgram(getClass().getResourceAsStream("RadixSort.cl"))
                          .build(ENABLE_MAD, define("WARP_SIZE", WARP_SIZE));
 
-//        out.println(program.getBuildLog());
+//        System.out.println(program.getBuildLog());
 
         ckRadixSortBlocksKeysOnly  = program.createCLKernel("radixSortBlocksKeysOnly");
         ckFindRadixOffsets         = program.createCLKernel("findRadixOffsets");

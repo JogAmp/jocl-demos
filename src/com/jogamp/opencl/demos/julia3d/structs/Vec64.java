@@ -16,29 +16,29 @@ class Vec64 extends Vec {
 
 
   public Vec setX(float val) {
-    accessor.setFloatAt(0, val);
+    accessor.setFloatAt(4*0, val);
     return this;
   }
 
   public float getX() {
-    return accessor.getFloatAt(0);
+    return accessor.getFloatAt(4*0);
   }
 
   public Vec setY(float val) {
-    accessor.setFloatAt(1, val);
+    accessor.setFloatAt(4*1, val);
     return this;
   }
 
   public float getY() {
-    return accessor.getFloatAt(1);
+    return accessor.getFloatAt(4*1);
   }
 
   public Vec setZ(float val) {
-    accessor.setFloatAt(2, val);
+    accessor.setFloatAt(4*2, val);
     return this;
   }
 
   public float getZ() {
-    return accessor.getFloatAt(2);
+    return accessor.getFloatAt(4*2);
   }
 }

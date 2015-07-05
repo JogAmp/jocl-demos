@@ -38,11 +38,11 @@ public class CLFFTPlan {
         int y;
         int z;
 
-        CLFFTDim3(int x, int y, int z) {
+/*        CLFFTDim3(int x, int y, int z) {
             this.x = x;
             this.y = y;
             this.z = z;
-        }
+        }*/
 
         CLFFTDim3(int[] size) {
             x = size[0];
@@ -154,11 +154,11 @@ public class CLFFTPlan {
     // temp buffer if same batch size is used again and again.
     int last_batch_size;
     // temporary buffer for interleaved plan
-    CLMemory tempmemobj;
+    CLMemory<FloatBuffer> tempmemobj;
     // temporary buffer for planner plan. Only one of tempmemobj or
     // (tempmemobj_real, tempmemobj_imag) pair is valid (allocated) depending
     // data format of plan (plannar or interleaved)
-    CLMemory tempmemobj_real, tempmemobj_imag;
+    CLMemory<FloatBuffer> tempmemobj_real, tempmemobj_imag;
     // Maximum size of signal for which local memory transposed based
     // fft is sufficient i.e. no global mem transpose (communication)
     // is needed
@@ -178,27 +178,28 @@ public class CLFFTPlan {
     // e.g. on NVidia it is 16.
     int num_local_mem_banks;
 
-    public class InvalidContextException extends Exception {
+    @SuppressWarnings("serial")
+	public class InvalidContextException extends Exception {
     }
 
     /**
      * Create a new FFT plan.
      *
      * Use the matching executeInterleaved() or executePlanar() depending on the dataFormat specified.
-     * @param context
+     * @param context Context to create program in and get devices from.
      * @param sizes Array of sizes for each dimension.  The length of array defines how many dimensions there are.
      * @param dataFormat Data format, InterleavedComplex (array of complex) or SplitComplex (separate planar arrays).
-     * @throws zephyr.cl.CLFFTPlan.InvalidContextException
+     * @throws InvalidContextException if we can't find any GPUs.
      */
     public CLFFTPlan(CLContext context, int[] sizes, CLFFTDataFormat dataFormat) throws InvalidContextException {
         int i;
-        int err;
+//        int err;
         boolean isPow2 = true;
-        String kString;
-        int num_devices;
+//        String kString;
+//        int num_devices;
         boolean gpu_found = false;
         CLDevice[] devices;
-        int ret_size;
+//        int ret_size;
 
         if (sizes.length < 1 || sizes.length > 3) {
             throw new IllegalArgumentException("Dimensions must be between 1 and 3");
@@ -297,7 +298,7 @@ public class CLFFTPlan {
 
     /**
      * Calculate FFT on interleaved complex data.
-     * @param queue
+     * @param queue Command queue to put kernels into.
      * @param batchSize How many instances to calculate.  Use 1 for a single FFT.
      * @param dir Direction of calculation, Forward or Inverse.
      * @param data_in Input buffer.
@@ -309,7 +310,7 @@ public class CLFFTPlan {
             CLBuffer<FloatBuffer> data_in, CLBuffer<FloatBuffer> data_out,
             CLEventList condition, CLEventList event) {
         int s;
-        if (format != format.InterleavedComplexFormat) {
+        if (format != CLFFTDataFormat.InterleavedComplexFormat) {
             throw new IllegalArgumentException();
         }
 
@@ -320,7 +321,8 @@ public class CLFFTPlan {
 
         allocateTemporaryBufferInterleaved(batchSize);
 
-        CLMemory[] memObj = new CLMemory[3];
+        @SuppressWarnings("rawtypes")
+		CLMemory[] memObj = new CLMemory[3];
         memObj[0] = data_in;
         memObj[1] = data_out;
         memObj[2] = tempmemobj;
@@ -404,26 +406,26 @@ public class CLFFTPlan {
 
     /**
      * Calculate FFT of planar data.
-     * @param queue
-     * @param batchSize
-     * @param dir
-     * @param data_in_real
-     * @param data_in_imag
-     * @param data_out_real
-     * @param data_out_imag
-     * @param contition
-     * @param event
+     * @param queue  Command queue to put kernels into.
+     * @param batchSize Undocumented by original author.
+     * @param dir Undocumented by original author.
+     * @param data_in_real Undocumented by original author.
+     * @param data_in_imag Undocumented by original author.
+     * @param data_out_real Undocumented by original author.
+     * @param data_out_imag Undocumented by original author.
+     * @param contition Undocumented by original author.
+     * @param event Undocumented by original author.
      */
     public void executePlanar(CLCommandQueue queue, int batchSize, CLFFTDirection dir,
             CLBuffer<FloatBuffer> data_in_real, CLBuffer<FloatBuffer> data_in_imag, CLBuffer<FloatBuffer> data_out_real, CLBuffer<FloatBuffer> data_out_imag,
             CLEventList contition, CLEventList event) {
         int s;
 
-        if (format != format.SplitComplexFormat) {
+        if (format != CLFFTDataFormat.SplitComplexFormat) {
             throw new IllegalArgumentException();
         }
 
-        int err;
+//        int err;
         WorkDimensions wd;
         boolean inPlaceDone = false;
 
@@ -431,8 +433,10 @@ public class CLFFTPlan {
 
         allocateTemporaryBufferPlanar(batchSize);
 
-        CLMemory[] memObj_real = new CLMemory[3];
-        CLMemory[] memObj_imag = new CLMemory[3];
+        @SuppressWarnings("rawtypes")
+		CLMemory[] memObj_real = new CLMemory[3];
+        @SuppressWarnings("rawtypes")
+		CLMemory[] memObj_imag = new CLMemory[3];
         memObj_real[0] = data_in_real;
         memObj_real[1] = data_out_real;
         memObj_real[2] = tempmemobj_real;
@@ -514,6 +518,7 @@ public class CLFFTPlan {
             out.printf("Run kernel %s with global dim = {%d*BatchSize}, local dim={%d}\n", kInfo.kernel_name, wd.gWorkItems, wd.lWorkItems);
         }
         out.printf("%s\n", kernel_string.toString());
+        out.close();
     }
 
     WorkDimensions getKernelWorkDimensions(CLFFTKernelInfo kernelInfo, int batchSize) {
@@ -581,12 +586,12 @@ public class CLFFTPlan {
     }
 
     private void createKernelList() {
-        CLFFTKernelInfo kern;
+//        CLFFTKernelInfo kern;
         for (CLFFTKernelInfo kinfo : this.kernel_list) {
             kinfo.kernel = program.createCLKernel(kinfo.kernel_name);
         }
 
-        if (format == format.SplitComplexFormat) {
+        if (format == CLFFTDataFormat.SplitComplexFormat) {
             twist_kernel = program.createCLKernel("clFFT_1DTwistSplit");
         } else {
             twist_kernel = program.createCLKernel("clFFT_1DTwistInterleaved");
@@ -749,7 +754,7 @@ public class CLFFTPlan {
     }
 
     void formattedLoad(StringBuilder kernelString, int aIndex, int gIndex, CLFFTDataFormat dataFormat) {
-        if (dataFormat == dataFormat.InterleavedComplexFormat) {
+        if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
             kernelString.append("        a[").append(aIndex).append("] = in[").append(gIndex).append("];\n");
         } else {
             kernelString.append("        a[").append(aIndex).append("].x = in_real[").append(gIndex).append("];\n");
@@ -758,7 +763,7 @@ public class CLFFTPlan {
     }
 
     void formattedStore(StringBuilder kernelString, int aIndex, int gIndex, CLFFTDataFormat dataFormat) {
-        if (dataFormat == dataFormat.InterleavedComplexFormat) {
+        if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
             kernelString.append("        out[").append(gIndex).append("] = a[").append(aIndex).append("];\n");
         } else {
             kernelString.append("        out_real[").append(gIndex).append("] = a[").append(aIndex).append("].x;\n");
@@ -767,7 +772,7 @@ public class CLFFTPlan {
     }
 
     int insertGlobalLoadsAndTranspose(StringBuilder kernelString, int N, int numWorkItemsPerXForm, int numXFormsPerWG, int R0, int mem_coalesce_width, CLFFTDataFormat dataFormat) {
-        int log2NumWorkItemsPerXForm = (int) log2(numWorkItemsPerXForm);
+        int log2NumWorkItemsPerXForm = log2(numWorkItemsPerXForm);
         int groupSize = numWorkItemsPerXForm * numXFormsPerWG;
         int i, j;
         int lMemSize = 0;
@@ -782,7 +787,7 @@ public class CLFFTPlan {
                 kernelString.append("    jj = lId >> ").append(log2NumWorkItemsPerXForm).append(";\n");
                 kernelString.append("    if( !s || (groupId < get_num_groups(0)-1) || (jj < s) ) {\n");
                 kernelString.append("        offset = mad24( mad24(groupId, ").append(numXFormsPerWG).append(", jj), ").append(N).append(", ii );\n");
-                if (dataFormat == dataFormat.InterleavedComplexFormat) {
+                if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
                     kernelString.append("        in += offset;\n");
                     kernelString.append("        out += offset;\n");
                 } else {
@@ -799,7 +804,7 @@ public class CLFFTPlan {
                 kernelString.append("    ii = lId;\n");
                 kernelString.append("    jj = 0;\n");
                 kernelString.append("    offset =  mad24(groupId, ").append(N).append(", ii);\n");
-                if (dataFormat == dataFormat.InterleavedComplexFormat) {
+                if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
                     kernelString.append("        in += offset;\n");
                     kernelString.append("        out += offset;\n");
                 } else {
@@ -817,11 +822,11 @@ public class CLFFTPlan {
             int numOuterIter = numXFormsPerWG / (groupSize / mem_coalesce_width);
 
             kernelString.append("    ii = lId & ").append(mem_coalesce_width - 1).append(";\n");
-            kernelString.append("    jj = lId >> ").append((int) log2(mem_coalesce_width)).append(";\n");
+            kernelString.append("    jj = lId >> ").append(log2(mem_coalesce_width)).append(";\n");
             kernelString.append("    lMemStore = sMem + mad24( jj, ").append(N + numWorkItemsPerXForm).append(", ii );\n");
             kernelString.append("    offset = mad24( groupId, ").append(numXFormsPerWG).append(", jj);\n");
             kernelString.append("    offset = mad24( offset, ").append(N).append(", ii );\n");
-            if (dataFormat == dataFormat.InterleavedComplexFormat) {
+            if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
                 kernelString.append("        in += offset;\n");
                 kernelString.append("        out += offset;\n");
             } else {
@@ -882,7 +887,7 @@ public class CLFFTPlan {
             lMemSize = (N + numWorkItemsPerXForm) * numXFormsPerWG;
         } else {
             kernelString.append("    offset = mad24( groupId,  ").append(N * numXFormsPerWG).append(", lId );\n");
-            if (dataFormat == dataFormat.InterleavedComplexFormat) {
+            if (dataFormat == CLFFTDataFormat.InterleavedComplexFormat) {
                 kernelString.append("        in += offset;\n");
                 kernelString.append("        out += offset;\n");
             } else {
@@ -893,7 +898,7 @@ public class CLFFTPlan {
             }
 
             kernelString.append("    ii = lId & ").append(N - 1).append(";\n");
-            kernelString.append("    jj = lId >> ").append((int) log2(N)).append(";\n");
+            kernelString.append("    jj = lId >> ").append(log2(N)).append(";\n");
             kernelString.append("    lMemStore = sMem + mad24( jj, ").append(N + numWorkItemsPerXForm).append(", ii );\n");
 
             kernelString.append("if((groupId == get_num_groups(0)-1) && s) {\n");
@@ -953,12 +958,12 @@ public class CLFFTPlan {
         int i, j, k, ind;
         int lMemSize = 0;
         int numIter = maxRadix / Nr;
-        String indent = "";
+//        String indent = "";
 
         if (numWorkItemsPerXForm >= mem_coalesce_width) {
             if (numXFormsPerWG > 1) {
                 kernelString.append("    if( !s || (groupId < get_num_groups(0)-1) || (jj < s) ) {\n");
-                indent = ("    ");
+//                indent = ("    ");
             }
             for (i = 0; i < maxRadix; i++) {
                 j = i % numIter;
@@ -975,7 +980,7 @@ public class CLFFTPlan {
 
             kernelString.append("    lMemLoad  = sMem + mad24( jj, ").append(N + numWorkItemsPerXForm).append(", ii );\n");
             kernelString.append("    ii = lId & ").append(mem_coalesce_width - 1).append(";\n");
-            kernelString.append("    jj = lId >> ").append((int) log2(mem_coalesce_width)).append(";\n");
+            kernelString.append("    jj = lId >> ").append(log2(mem_coalesce_width)).append(";\n");
             kernelString.append("    lMemStore = sMem + mad24( jj,").append(N + numWorkItemsPerXForm).append(", ii );\n");
 
             for (i = 0; i < maxRadix; i++) {
@@ -1033,7 +1038,7 @@ public class CLFFTPlan {
             kernelString.append("    lMemLoad  = sMem + mad24( jj,").append(N + numWorkItemsPerXForm).append(", ii );\n");
 
             kernelString.append("    ii = lId & ").append(N - 1).append(";\n");
-            kernelString.append("    jj = lId >> ").append((int) log2(N)).append(";\n");
+            kernelString.append("    jj = lId >> ").append(log2(N)).append(";\n");
             kernelString.append("    lMemStore = sMem + mad24( jj,").append(N + numWorkItemsPerXForm).append(", ii );\n");
 
             for (i = 0; i < maxRadix; i++) {
@@ -1411,7 +1416,7 @@ public class CLFFTPlan {
         int maxArrayLen = this.max_radix;
         int batchSize = this.min_mem_coalesce_width;
         CLFFTDataFormat dataFormat = this.format;
-        boolean vertical = (dir == dir.X) ? false : true;
+        boolean vertical = (dir == CLFFTKernelDir.X) ? false : true;
 
         numRadices = getGlobalRadixInfo(n, radixArr, R1Arr, R2Arr);
 
@@ -1432,7 +1437,7 @@ public class CLFFTPlan {
         //}
 
         int N = n;
-        int m = (int) log2(n);
+        int m = log2(n);
         int Rinit = vertical ? BS : 1;
         batchSize = vertical ? Math.min(BS, batchSize) : batchSize;
         int passNum;
@@ -1504,9 +1509,9 @@ public class CLFFTPlan {
             insertVariables(localString, R1);
 
             if (vertical) {
-                localString.append("xNum = groupId >> ").append((int) log2(numBlocksPerXForm)).append(";\n");
+                localString.append("xNum = groupId >> ").append(log2(numBlocksPerXForm)).append(";\n");
                 localString.append("groupId = groupId & ").append(numBlocksPerXForm - 1).append(";\n");
-                localString.append("indexIn = mad24(groupId, ").append(batchSize).append(", xNum << ").append((int) log2(n * BS)).append(");\n");
+                localString.append("indexIn = mad24(groupId, ").append(batchSize).append(", xNum << ").append(log2(n * BS)).append(");\n");
                 localString.append("tid = mul24(groupId, ").append(batchSize).append(");\n");
                 localString.append("i = tid >> ").append(lgStrideO).append(";\n");
                 localString.append("j = tid & ").append(strideO - 1).append(";\n");
@@ -1514,7 +1519,7 @@ public class CLFFTPlan {
                 for (i = 0; i < passNum; i++) {
                     stride *= radixArr[i];
                 }
-                localString.append("indexOut = mad24(i, ").append(stride).append(", j + ").append("(xNum << ").append((int) log2(n * BS)).append("));\n");
+                localString.append("indexOut = mad24(i, ").append(stride).append(", j + ").append("(xNum << ").append(log2(n * BS)).append("));\n");
                 localString.append("bNum = groupId;\n");
             } else {
                 int lgNumBlocksPerXForm = log2(numBlocksPerXForm);
@@ -1540,7 +1545,7 @@ public class CLFFTPlan {
             localString.append("j = tid >> ").append(lgBatchSize).append(";\n");
             localString.append("indexIn += mad24(j, ").append(strideI).append(", i);\n");
 
-            if (dataFormat == dataFormat.SplitComplexFormat) {
+            if (dataFormat == CLFFTDataFormat.SplitComplexFormat) {
                 localString.append("in_real += indexIn;\n");
                 localString.append("in_imag += indexIn;\n");
                 for (j = 0; j < R1; j++) {
@@ -1600,7 +1605,7 @@ public class CLFFTPlan {
             // twiddle
             if (passNum < (numPasses - 1)) {
                 localString.append("l = ((bNum << ").append(lgBatchSize).append(") + i) >> ").append(lgStrideO).append(";\n");
-                localString.append("k = j << ").append((int) log2(R1 / R2)).append(";\n");
+                localString.append("k = j << ").append(log2(R1 / R2)).append(";\n");
                 localString.append("ang1 = dir*(2.0f*M_PI/").append(N).append(")*l;\n");
                 for (t = 0; t < R1; t++) {
                     localString.append("ang = ang1*(k + ").append((t % R2) * R1 + (t / R2)).append(");\n");
@@ -1612,8 +1617,8 @@ public class CLFFTPlan {
             // Store Data
             if (strideO == 1) {
 
-                localString.append("lMemStore = sMem + mad24(i, ").append(radix + 1).append(", j << ").append((int) log2(R1 / R2)).append(");\n");
-                localString.append("lMemLoad = sMem + mad24(tid >> ").append((int) log2(radix)).append(", ").append(radix + 1).append(", tid & ").append(radix - 1).append(");\n");
+                localString.append("lMemStore = sMem + mad24(i, ").append(radix + 1).append(", j << ").append(log2(R1 / R2)).append(");\n");
+                localString.append("lMemLoad = sMem + mad24(tid >> ").append(log2(radix)).append(", ").append(radix + 1).append(", tid & ").append(radix - 1).append(");\n");
 
                 for (i = 0; i < R1 / R2; i++) {
                     for (j = 0; j < R2; j++) {
@@ -1658,7 +1663,7 @@ public class CLFFTPlan {
                 localString.append("barrier(CLK_LOCAL_MEM_FENCE);\n");
 
                 localString.append("indexOut += tid;\n");
-                if (dataFormat == dataFormat.SplitComplexFormat) {
+                if (dataFormat == CLFFTDataFormat.SplitComplexFormat) {
                     localString.append("out_real += indexOut;\n");
                     localString.append("out_imag += indexOut;\n");
                     for (k = 0; k < R1; k++) {
@@ -1676,7 +1681,7 @@ public class CLFFTPlan {
 
             } else {
                 localString.append("indexOut += mad24(j, ").append(numIter * strideO).append(", i);\n");
-                if (dataFormat == dataFormat.SplitComplexFormat) {
+                if (dataFormat == CLFFTDataFormat.SplitComplexFormat) {
                     localString.append("out_real += indexOut;\n");
                     localString.append("out_imag += indexOut;\n");
                     for (k = 0; k < R1; k++) {
@@ -1739,6 +1744,8 @@ public class CLFFTPlan {
                 if (this.size.z > 1) {
                     createGlobalFFTKernelString(this.size.z, this.size.x * this.size.y, dir, 1);
                 }
+                break;
+
             default:
                 return;
         }

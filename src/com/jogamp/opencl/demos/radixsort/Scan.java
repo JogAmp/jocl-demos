@@ -21,11 +21,11 @@ import static com.jogamp.opencl.CLProgram.CompilerOptions.*;
 public class Scan implements CLResource {
 
     private final static int MAX_WORKGROUP_INCLUSIVE_SCAN_SIZE = 1024;
-    private final static int MAX_LOCAL_GROUP_SIZE = 256;
+//    private final static int MAX_LOCAL_GROUP_SIZE = 256;
     private final static int WORKGROUP_SIZE = 256;
     private final static int MAX_BATCH_ELEMENTS = 64 * 1048576;
-    private final static int MIN_SHORT_ARRAY_SIZE = 4;
-    private final static int MAX_SHORT_ARRAY_SIZE = 4 * WORKGROUP_SIZE;
+//    private final static int MIN_SHORT_ARRAY_SIZE = 4;
+//    private final static int MAX_SHORT_ARRAY_SIZE = 4 * WORKGROUP_SIZE;
     private final static int MIN_LARGE_ARRAY_SIZE = 8 * WORKGROUP_SIZE;
     private final static int MAX_LARGE_ARRAY_SIZE = 4 * WORKGROUP_SIZE * WORKGROUP_SIZE;
 

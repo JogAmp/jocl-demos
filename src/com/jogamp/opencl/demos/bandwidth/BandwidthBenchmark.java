@@ -27,11 +27,11 @@ public class BandwidthBenchmark {
     private static int MEMCOPY_ITERATIONS = 100;
     private static int DEFAULT_SIZE = (32 * (1 << 20));    //32 M
     private static int DEFAULT_INCREMENT = (1 << 22);     //4 M
-    private static int CACHE_CLEAR_SIZE = (1 << 24);       //16 M
+//    private static int CACHE_CLEAR_SIZE = (1 << 24);       //16 M
 
     //shmoo mode defines
     private static int SHMOO_MEMSIZE_MAX = (1 << 26);         //64 M
-    private static int SHMOO_MEMSIZE_START = (1 << 10);         //1 KB
+//    private static int SHMOO_MEMSIZE_START = (1 << 10);         //1 KB
     private static int SHMOO_INCREMENT_1KB = (1 << 10);         //1 KB
     private static int SHMOO_INCREMENT_2KB = (1 << 11);         //2 KB
     private static int SHMOO_INCREMENT_10KB = (10 * (1 << 10));  //10KB
@@ -248,7 +248,7 @@ public class BandwidthBenchmark {
         CLContext context = queue.getContext();
 
         //allocate and init host memory, pinned or conventional
-        if (memMode == memMode.PINNED) {
+        if (memMode == MEMORY.PINNED) {
             // Create a host buffer
             cmPinnedData = context.createBuffer(memSize, Mem.READ_WRITE, Mem.ALLOCATE_BUFFER);
 
@@ -268,7 +268,7 @@ public class BandwidthBenchmark {
         cmDevData = context.createBuffer(memSize, Mem.READ_WRITE);
 
         // initialize device memory
-        if (memMode == memMode.PINNED) {
+        if (memMode == MEMORY.PINNED) {
             // Get a mapped pointer
             h_data = queue.putMapBuffer(cmPinnedData, WRITE, true);
 
@@ -284,7 +284,7 @@ public class BandwidthBenchmark {
         
         long delta = System.nanoTime();
 
-        if (accMode == accMode.DIRECT) {
+        if (accMode == ACCESS.DIRECT) {
             // DIRECT:  API access to device buffer
             cmDevData = cmDevData.cloneWith(h_data);
             for (int i = 0; i < MEMCOPY_ITERATIONS; i++) {
@@ -329,7 +329,7 @@ public class BandwidthBenchmark {
         CLContext context = queue.getContext();
 
         // Allocate and init host memory, pinned or conventional
-        if (memMode == memMode.PINNED) {
+        if (memMode == MEMORY.PINNED) {
             // Create a host buffer
             cmPinnedData = context.createBuffer(memSize, Mem.READ_WRITE, Mem.ALLOCATE_BUFFER);
 
@@ -355,8 +355,8 @@ public class BandwidthBenchmark {
 
         long delta = System.nanoTime();
 
-        if (accMode == accMode.DIRECT) {
-            if (memMode == memMode.PINNED) {
+        if (accMode == ACCESS.DIRECT) {
+            if (memMode == MEMORY.PINNED) {
                 // Get a mapped pointer
                 h_data = queue.putMapBuffer(cmPinnedData, WRITE, true);
             }
@@ -460,14 +460,14 @@ public class BandwidthBenchmark {
             } else if (kind == COPY.HOST_TO_DEVICE) {
                 System.out.print("Host to Device Bandwidth, "+iNumDevs+" Device(s), ");
             }
-            if (memMode == memMode.PAGEABLE) {
+            if (memMode == MEMORY.PAGEABLE) {
                 System.out.print("Paged memory");
-            } else if (memMode == memMode.PINNED) {
+            } else if (memMode == MEMORY.PINNED) {
                 System.out.print("Pinned memory");
             }
-            if (accMode == accMode.DIRECT) {
+            if (accMode == ACCESS.DIRECT) {
                 System.out.println(", direct access");
-            } else if (accMode == accMode.MAPPED) {
+            } else if (accMode == ACCESS.MAPPED) {
                 System.out.println(", mapped access");
             }
         }

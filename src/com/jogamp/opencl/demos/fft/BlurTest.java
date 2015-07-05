@@ -21,13 +21,13 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBufferInt;
 import java.io.File;
-import java.io.FileInputStream;
+//import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -86,7 +86,7 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
             try {
                 File file = null;
 
-                if (true) {
+//                if (true) {
                     fc.setDialogTitle("Select Image File");
                     fc.setPreferredSize(new Dimension(500, 600));
                     if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -95,9 +95,9 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
                         System.exit(0);
                     }
 
-                } else {
-                    file = new File("/home/notzed/cat0.jpg");
-                }
+//                } else {
+//                    file = new File("/home/notzed/cat0.jpg");
+//                }
                 img = ImageIO.read(file);
                 if (img == null) {
                     JOptionPane.showMessageDialog(null, "Couldn't load file");
@@ -117,7 +117,7 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
         g.dispose();
 
         JFrame win = new JFrame("Blur Demo");
-        win.setDefaultCloseOperation(win.EXIT_ON_CLOSE);
+        win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel main = new JPanel();
         main.setLayout(new BorderLayout());
@@ -168,7 +168,7 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
             }
         });
         ButtonGroup opt = new ButtonGroup();
-        JToggleButton tb;
+//        JToggleButton tb;
         blurButton = new JToggleButton("Blur");
         opt.add(blurButton);
         buttons.add(blurButton);
@@ -349,17 +349,17 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
         rGBuffer = cl.createFloatBuffer(width * height * 2, Mem.READ_WRITE);
         gGBuffer = cl.createFloatBuffer(width * height * 2, Mem.READ_WRITE);
         bGBuffer = cl.createFloatBuffer(width * height * 2, Mem.READ_WRITE);
-        if (false) {
-            try {
-                CLProgram p = cl.createProgram(new FileInputStream("/home/notzed/cl/fft-512.cl"));
-                p.build();
-                fft512 = p.createCLKernel("fft0");
-            } catch (IOException ex) {
-                Logger.getLogger(BlurTest.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        } else {
+//        if (false) {
+//            try {
+//                CLProgram p = cl.createProgram(new FileInputStream("/home/notzed/cl/fft-512.cl"));
+//                p.build();
+//                fft512 = p.createCLKernel("fft0");
+//            } catch (IOException ex) {
+//                Logger.getLogger(BlurTest.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        } else {
             fft = new CLFFTPlan(cl, new int[]{width, height}, CLFFTPlan.CLFFTDataFormat.InterleavedComplexFormat);
-        }
+//        }
         //fft.dumpPlan(null);
     }
 
@@ -406,17 +406,17 @@ public class BlurTest implements Runnable, ChangeListener, ActionListener {
         kGrey2Plane.setArg(5, width);
         q.put2DRangeKernel(kGrey2Plane, 0, 0, width, height, 64, 1);
 
-        if (true) {
+//        if (true) {
             fft.executeInterleaved(q, 1, CLFFTPlan.CLFFTDirection.Forward, tmpBuffer, psfBuffer, null, null);
-        } else if (true) {
-            fft512.setArg(0, tmpBuffer);
-            fft512.setArg(1, psfBuffer);
-            fft512.setArg(2, -1);
-            fft512.setArg(3, height);
+//        } else if (true) {
+//            fft512.setArg(0, tmpBuffer);
+//            fft512.setArg(1, psfBuffer);
+//            fft512.setArg(2, -1);
+//            fft512.setArg(3, height);
             //q.put1DRangeKernel(fft512, 0,height*64, 64);
-            q.put2DRangeKernel(fft512, 0, 0, height * 64, 1, 64, 1);
-            System.out.println("running kernel " + 64 * height + ", " + 64);
-        }
+//            q.put2DRangeKernel(fft512, 0, 0, height * 64, 1, 64, 1);
+//            System.out.println("running kernel " + 64 * height + ", " + 64);
+//        }
     }
 
     // g = f x h

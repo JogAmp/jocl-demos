@@ -22,6 +22,11 @@
         <property name="javac.debug" value="${javacdebug}"/>
         <property name="javac.source" value="${target.sourcelevel}"/>
         <property name="javac.target" value="${target.targetlevel}"/>
+
+    	<property name="c.compiler.debug" value="true" /> 
+        <property name="javacdebug"       value="true" /> 
+        <property name="javacdebuglevel"  value="source,lines,vars" /> 
+
         <property name="javac.compilerargs" value="-bootclasspath '${target.rt.jar}' -Xlint -g:${javacdebuglevel}"/>
     </target>
 

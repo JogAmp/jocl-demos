@@ -52,7 +52,8 @@ public class Julia3d {
         updateCamera();
 
         //setup, prefere GPUs
-        CLDevice device = CLPlatform.getDefault(type(GPU)).getMaxFlopsDevice();
+        @SuppressWarnings("unchecked")
+		CLDevice device = CLPlatform.getDefault(type(GPU)).getMaxFlopsDevice();
         if(device == null) {
             device = CLPlatform.getDefault().getMaxFlopsDevice();
         }
