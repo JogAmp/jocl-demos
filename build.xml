@@ -18,15 +18,16 @@
     <import file="${gluegen.root}/make/jogamp-env.xml" />
     <import file="${gluegen.root}/make/jogamp-archivetasks.xml" />
 
-    <target name="-pre-init" depends="jogamp.env.init">
-        <property name="javac.debug" value="${javacdebug}"/>
-        <property name="javac.source" value="${target.sourcelevel}"/>
-        <property name="javac.target" value="${target.targetlevel}"/>
-
-    	<property name="c.compiler.debug" value="true" /> 
+    <target name="set.debug">
         <property name="javacdebug"       value="true" /> 
         <property name="javacdebuglevel"  value="source,lines,vars" /> 
+    </target>
 
+    <target name="-pre-init" depends="jogamp.env.init">
+        <property name="javac.debug" value="${javacdebug}"/>
+        <property name="javac.debuglevel" value="${javacdebuglevel}"/>
+        <property name="javac.source" value="${target.sourcelevel}"/>
+        <property name="javac.target" value="${target.targetlevel}"/>
         <property name="javac.compilerargs" value="-bootclasspath '${target.rt.jar}' -Xlint -g:${javacdebuglevel}"/>
     </target>
 
@@ -128,5 +129,9 @@
             </filterchain>
         </copy>
     </target>
+
+    <target name="all" description="Release build" depends="default"/>
+    <target name="all.debug" description="Debug build" depends="set.debug, default"/>
+    <target name="all.ide" description="Debug IDE build, no tagging or archives" depends="set.debug, compile"/>
 
 </project>
