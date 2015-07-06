@@ -7,6 +7,7 @@ package com.jogamp.opencl.demos.radixsort;
 import com.jogamp.opencl.CLBuffer;
 import com.jogamp.opencl.CLCommandQueue;
 import com.jogamp.opencl.CLContext;
+import com.jogamp.opencl.CLDevice;
 import com.jogamp.opencl.CLPlatform;
 import java.io.IOException;
 import java.nio.IntBuffer;
@@ -28,12 +29,20 @@ public class RadixSortDemo {
         try{
             //single GPU setup
             context = CLContext.create(CLPlatform.getDefault().getMaxFlopsDevice(GPU));
-            CLCommandQueue queue = context.getDevices()[0].createCommandQueue();
+            CLDevice device = context.getDevices()[0];
+            CLCommandQueue queue = device.createCommandQueue();
 
             int maxValue = Integer.MAX_VALUE;
             int samples  = 10;
 
             int[] workgroupSizes = new int[] {128, 256};
+
+            // make sure workgroup sizes don't exceed device maximum
+            int maxWorkgroupSize = device.getMaxWorkGroupSize();
+            for( int i = 0; i < workgroupSizes.length; ++i ) {
+            	if( workgroupSizes[i] > maxWorkgroupSize )
+                    throw new RuntimeException("Workgroup size " + workgroupSizes[i] + " greater than device max of "+ maxWorkgroupSize);            		
+            }
 
             int[] runs = new int[] {   32768,
                                        65536,

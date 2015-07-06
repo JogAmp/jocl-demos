@@ -78,35 +78,30 @@ uint4 scan4(uint4 idata, __local uint* ptr)
     return val4;
 }
 
-#ifdef MAC
-__kernel uint4 rank4(uint4 preds, __local uint* sMem)
-#else
-uint4 rank4(uint4 preds, __local uint* sMem)
-#endif
+uint4 rank4(uint4 preds, __local uint* sMem, __local uint* pnumtrue)
 {
 	int localId = get_local_id(0);
 	int localSize = get_local_size(0);
 
 	uint4 address = scan4(preds, sMem);
-	
-	__local uint numtrue;
+
 	if (localId == localSize - 1) 
 	{
-		numtrue = address.w + preds.w;
+		*pnumtrue = address.w + preds.w;
 	}
 	barrier(CLK_LOCAL_MEM_FENCE);
 	
 	uint4 rank;
 	int idx = localId*4;
-	rank.x = (preds.x) ? address.x : numtrue + idx - address.x;
-	rank.y = (preds.y) ? address.y : numtrue + idx + 1 - address.y;
-	rank.z = (preds.z) ? address.z : numtrue + idx + 2 - address.z;
-	rank.w = (preds.w) ? address.w : numtrue + idx + 3 - address.w;
+	rank.x = (preds.x) ? address.x : *pnumtrue + idx - address.x;
+	rank.y = (preds.y) ? address.y : *pnumtrue + idx + 1 - address.y;
+	rank.z = (preds.z) ? address.z : *pnumtrue + idx + 2 - address.z;
+	rank.w = (preds.w) ? address.w : *pnumtrue + idx + 3 - address.w;
 	
 	return rank;
 }
 
-void radixSortBlockKeysOnly(uint4 *key, uint nbits, uint startbit, __local uint* sMem)
+void radixSortBlockKeysOnly(uint4 *key, uint nbits, uint startbit, __local uint* sMem, __local uint* pnumtrue)
 {
 	int localId = get_local_id(0);
     int localSize = get_local_size(0);
@@ -121,7 +116,7 @@ void radixSortBlockKeysOnly(uint4 *key, uint nbits, uint startbit, __local uint*
         
 		uint4 r;
 		
-		r = rank4(lsb, sMem);
+		r = rank4(lsb, sMem, pnumtrue);
 
         // This arithmetic strides the ranks across 4 CTA_SIZE regions
         sMem[(r.x & 3) * localSize + (r.x >> 2)] = (*key).x;
@@ -152,10 +147,13 @@ __kernel void radixSortBlocksKeysOnly(__global uint4* keysIn,
 	
 	uint4 key;
 	key = keysIn[globalId];
+    // must be declared at kernel function scope on Mac, was previously declared
+    // down inside the rank4() function
+	__local uint numtrue;
 	
 	barrier(CLK_LOCAL_MEM_FENCE);
 	
-	radixSortBlockKeysOnly(&key, nbits, startbit, sMem);
+	radixSortBlockKeysOnly(&key, nbits, startbit, sMem, &numtrue);
 	
 	keysOut[globalId] = key;
 }
